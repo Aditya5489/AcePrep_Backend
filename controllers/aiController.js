@@ -9,6 +9,17 @@ const groq = new Groq({
   apiKey: process.env.GROQ_API_KEY,
 });
 
+const extractJSON = (text) => {
+  try {
+    return JSON.parse(text);
+  } catch (e) {}
+
+  const match = text.match(/\{[\s\S]*\}|\[[\s\S]*\]/);
+  if (!match) throw new Error("Invalid JSON from AI");
+
+  return JSON.parse(match[0]);
+};
+
 const generateInterviewQuestions = async (req, res) => {
   try {
     const { role, experience, topicsToFocus, numberOfQuestions } = req.body;
@@ -44,7 +55,7 @@ const generateInterviewQuestions = async (req, res) => {
       .replace(/```/g, "")
       .trim();
 
-    const data = JSON.parse(cleanedText);
+    const data = extractJSON(cleanedText);
 
     res.status(200).json(data);
   } catch (error) {
@@ -86,7 +97,7 @@ const generateConceptExplaination = async (req, res) => {
       .replace(/```/g, "")
       .trim();
 
-    const data = JSON.parse(cleanedText);
+    const data = extractJSON(cleanedText);
 
     res.status(200).json(data);
   } catch (error) {
